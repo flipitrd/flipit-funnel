@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>flipit. · Tu cocina, reconfigurada.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Instrument+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --o:#F7931E;   /* flipit orange */
+  --od:rgba(247,147,30,.12);
+  --g:#C9A96E;   /* gold */
+  --gd:rgba(201,169,110,.10);
+  --dk:#0C0F12;
+  --c1:#141820;
+  --c2:#1A202A;
+  --ln:#242C38;
+  --ln2:#2C3644;
+  --wh:#F0EDE8;
+  --d1:#7A8090;
+  --d2:#404856;
+  --r:14px;
+  --r2:8px;
+}
+html{background:var(--dk);scroll-behavior:smooth}
+body{font-family:'Instrument Sans',sans-serif;background:var(--dk);color:var(--wh);
+  min-height:100vh;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+/* noise */
+body::before{content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:0;opacity:.35}
+
+/* ── PROGRESS BAR ── */
+.progress-wrap{position:fixed;top:0;left:0;right:0;z-index:100;
+  background:rgba(12,15,18,.92);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--ln);padding:12px 22px}
+.progress-inner{max-width:520px;margin:0 auto}
+.progress-logo{font-size:14px;font-weight:600;letter-spacing:-.01em;
+  color:var(--wh);margin-bottom:10px}
+.progress-logo span{color:var(--o)}
+.steps{display:flex;gap:4px;align-items:center}
+.step{flex:1;height:3px;border-radius:2px;background:var(--ln2);transition:background .4s}
+.step.done{background:var(--o)}
+.step.active{background:rgba(247,147,30,.5)}
+.step-labels{display:flex;justify-content:space-between;margin-top:6px}
+.step-lbl{font-size:9px;color:var(--d2);letter-spacing:.06em;text-transform:uppercase;transition:color .3s}
+.step-lbl.active{color:var(--o)}
+
+/* ── SECTIONS ── */
+section{max-width:520px;margin:0 auto;padding:0 22px;position:relative;z-index:1}
+.section-block{padding-top:80px;padding-bottom:40px}
+
+/* ── STEP DIVIDER ── */
+.step-divider{
+  max-width:520px;margin:0 auto;padding:52px 22px 0;
+  display:flex;align-items:center;gap:16px;
+  position:relative;z-index:1}
+.step-divider-line{flex:1;height:1px;
+  background:linear-gradient(to right,transparent,var(--ln2),transparent)}
+.step-divider-label{
+  display:flex;align-items:center;gap:10px;
+  background:var(--c1);border:1px solid var(--ln);
+  border-radius:40px;padding:7px 16px 7px 12px;
+  white-space:nowrap;flex-shrink:0}
+.step-divider-num{
+  font-family:'Cormorant Garamond',serif;
+  font-size:17px;font-weight:500;color:var(--o);
+  line-height:1;width:22px;text-align:center}
+.step-divider-name{
+  font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--d1);font-weight:500}
+
+/* ── DIVIDER (legacy, unused) ── */
+.divider{max-width:520px;margin:0 auto;padding:0 22px}
+.divider-line{height:1px;background:linear-gradient(to right,transparent,var(--ln2),transparent)}
+
+.eyebrow{font-size:10px;letter-spacing:.18em;color:var(--o);text-transform:uppercase;
+  font-weight:500;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.eyebrow::before{content:'';width:18px;height:1px;background:var(--o)}
+h2{font-family:'Cormorant Garamond',serif;font-size:clamp(32px,8vw,48px);
+  font-weight:400;line-height:1.08;color:var(--wh);margin-bottom:12px}
+h2 em{font-style:italic;color:var(--g)}
+.section-sub{font-size:13px;color:var(--d1);line-height:1.7;margin-bottom:28px}
+
+/* ── SLIDER ── */
+.slider-card{background:var(--c1);border:1px solid var(--ln);border-radius:var(--r);padding:24px 20px}
+.slider-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:20px}
+.slider-lbl{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--d1)}
+.slider-val{font-family:'Cormorant Garamond',serif;font-size:30px;color:var(--g);font-weight:500}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:2px;
+  background:var(--ln2);border-radius:1px;outline:none;cursor:pointer;margin-bottom:8px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;
+  border-radius:50%;background:var(--g);margin-top:-10px;cursor:pointer;
+  box-shadow:0 0 0 5px rgba(201,169,110,.15)}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--g);border:none}
+.slider-range{display:flex;justify-content:space-between;font-size:10px;color:var(--d2)}
+.dev-note{margin-top:18px;padding-top:16px;border-top:1px solid var(--ln);
+  display:flex;align-items:flex-start;gap:10px}
+.dev-dot{width:5px;height:5px;border-radius:50%;background:var(--g);flex-shrink:0;margin-top:5px}
+.dev-lbl{font-size:11.5px;color:var(--d1);flex:1;line-height:1.5}
+.dev-val{font-size:12px;font-weight:500;color:var(--wh);white-space:nowrap}
+
+/* seg track */
+.seg-wrap{margin-top:14px}
+.seg-track{display:flex;height:3px;gap:2px;border-radius:2px;overflow:hidden}
+.seg-chunk{flex:1;background:var(--ln2);transition:background .35s;border-radius:1px}
+.seg-chunk.on{background:var(--g)}
+.seg-labels{display:flex;justify-content:space-between;margin-top:7px}
+.seg-lbl{font-size:10px;color:var(--d2);letter-spacing:.06em;text-transform:uppercase;transition:color .3s}
+.seg-lbl.on{color:var(--g)}
+
+
+/* ── INVESTMENT CONTEXT ── */
+.invest-card{margin-top:18px;background:linear-gradient(135deg,rgba(247,147,30,.08),rgba(201,169,110,.06));
+  border:1px solid rgba(247,147,30,.22);border-radius:var(--r);padding:18px 18px 16px}
+.invest-title{font-family:'Cormorant Garamond',serif;font-size:25px;font-weight:500;
+  color:var(--wh);line-height:1.15;margin-bottom:8px}
+.invest-text{font-size:13px;color:var(--d1);line-height:1.7;margin-bottom:14px}
+.invest-range-wrap{display:flex;justify-content:space-between;align-items:center;
+  padding:13px 0;border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:12px}
+.invest-range-label{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--g)}
+.invest-range{font-family:'Cormorant Garamond',serif;font-size:28px;color:var(--o);font-weight:500;text-align:right}
+.invest-note{font-size:11.5px;color:var(--d1);line-height:1.55;opacity:.78}
+
+/* intervention levels */
+.levels{display:flex;flex-direction:column;gap:10px;margin-top:22px}
+.lcard{background:var(--c1);border:1px solid var(--ln);border-radius:var(--r);
+  overflow:hidden;cursor:pointer;transition:border-color .25s,transform .15s}
+.lcard:active{transform:scale(.99)}
+.lcard.sel{border-color:rgba(247,147,30,.5)}
+.lcard-topbar{height:2px;background:transparent;transition:background .3s}
+.lcard.sel .lcard-topbar{background:linear-gradient(to right,var(--o),rgba(247,147,30,.2))}
+.lcard-top{display:flex;align-items:center;gap:14px;padding:16px 18px 0}
+.lnum{font-family:'Cormorant Garamond',serif;font-size:28px;color:var(--d2);
+  width:32px;flex-shrink:0;transition:color .3s;line-height:1}
+.lcard.sel .lnum{color:var(--o)}
+.lmeta{flex:1}
+.lname{font-size:16px;font-weight:500;color:var(--wh);line-height:1;margin-bottom:3px}
+.lsub{font-size:11px;color:var(--d1);transition:color .2s}
+.lcard.sel .lsub{color:var(--o)}
+.lprice{text-align:right;flex-shrink:0}
+.lprice-val{font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--g);font-weight:500}
+.lprice-tag{font-size:9px;color:var(--d2);letter-spacing:.05em}
+.lcheck{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--ln2);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  transition:all .2s;font-size:10px}
+.lcard.sel .lcheck{background:var(--o);border-color:var(--o);color:var(--dk)}
+/* static body — always visible */
+.lcard-body{padding:0 18px 18px;border-top:1px solid var(--ln);margin-top:14px}
+.ldesc{font-size:12.5px;color:var(--d1);line-height:1.7;margin:14px 0 16px;
+  padding:11px 13px;background:var(--c2);border-radius:var(--r2)}
+.inc-title{font-size:9px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--d2);margin-bottom:9px}
+.inc-list{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.inc-row{display:flex;align-items:flex-start;gap:9px;font-size:12px;color:var(--d1);line-height:1.45}
+.inc-dot{width:4px;height:4px;border-radius:50%;background:var(--o);
+  flex-shrink:0;margin-top:5px;opacity:.8}
+.prop-title{font-size:9px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--d2);margin-bottom:9px}
+.prop-rows{display:flex;flex-direction:column;gap:6px}
+.prop-row{display:flex;align-items:center;gap:10px}
+.prop-lbl{font-size:11px;color:var(--d1);width:115px;flex-shrink:0}
+.prop-track{flex:1;height:3px;background:var(--ln2);border-radius:2px;overflow:hidden}
+.prop-fill{height:100%;border-radius:2px;background:var(--o);opacity:.7}
+.prop-pct{font-size:10px;color:var(--d2);width:26px;text-align:right;flex-shrink:0}
+
+/* ── PACKAGES ── */
+.pkgs{display:flex;flex-direction:column;gap:10px;margin-top:8px}
+.pkg{background:var(--c1);border:1px solid var(--ln);border-radius:var(--r);
+  overflow:hidden;cursor:pointer;transition:border-color .25s,transform .15s;position:relative}
+.pkg:active{transform:scale(.99)}
+.pkg.sel{border-color:rgba(247,147,30,.6)}
+.pkg-bar{height:2px;background:transparent;transition:background .3s}
+.pkg.sel .pkg-bar{background:linear-gradient(to right,var(--o),rgba(247,147,30,.3))}
+.pkg-head{padding:18px 18px 0}
+.pkg-meta{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.pkg-left{}
+.pkg-time{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--d2);margin-bottom:5px}
+.pkg-name{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:500;
+  color:var(--wh);line-height:1}
+.pkg-right{text-align:right}
+.pkg-price{font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--o);font-weight:500}
+.pkg-usd{font-size:11px;color:var(--d1);margin-top:3px}
+.pkg-dep{font-size:10px;color:var(--g);margin-top:2px}
+.pkg-items{padding:0 18px 16px;list-style:none;margin-top:8px;
+  border-top:1px solid var(--ln);padding-top:12px}
+.pkg-items li{font-size:12px;color:var(--d1);padding:4px 0;
+  display:flex;gap:8px;align-items:flex-start;line-height:1.4}
+.pkg-items li::before{content:'·';color:var(--o);flex-shrink:0;margin-top:0px}
+.pkg-sel-wrap{padding:0 18px 16px;display:none}
+.pkg.sel .pkg-sel-wrap{display:block}
+.pkg-sel-btn{width:100%;padding:12px;background:var(--o);color:var(--dk);
+  border:none;border-radius:var(--r2);font-family:'Instrument Sans',sans-serif;
+  font-size:13px;font-weight:600;cursor:pointer;letter-spacing:.03em}
+
+/* best value badge */
+.best-badge{position:absolute;top:14px;right:14px;
+  font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+  background:var(--o);color:var(--dk);padding:3px 8px;border-radius:20px;font-weight:600}
+.pkg-rec-note{margin:0 0 16px;padding:13px 15px;background:var(--c2);border:1px solid var(--ln);border-radius:var(--r2);font-size:12.5px;color:var(--d1);line-height:1.55}
+.pkg-rec-note strong{color:var(--wh);font-weight:600}
+.pkg-rec-badge{display:inline-block;margin-top:8px;font-size:9px;letter-spacing:.1em;text-transform:uppercase;background:rgba(247,147,30,.12);color:var(--o);padding:4px 8px;border-radius:20px;font-weight:600}
+.pkg.recommended{border-color:rgba(201,169,110,.45)}
+.pkg-smart-tag{display:inline-block;margin-left:6px;font-size:9px;letter-spacing:.1em;text-transform:uppercase;background:var(--o);color:var(--dk);padding:3px 7px;border-radius:20px;font-weight:700;vertical-align:middle}
+
+/* ── GALLERY ── */
+.gallery-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.gal-item{border-radius:var(--r2);overflow:hidden;aspect-ratio:4/3;
+  background:var(--c2);position:relative;cursor:pointer}
+.gal-item:first-child{grid-column:1/-1;aspect-ratio:16/9}
+.gal-img{width:100%;height:100%;object-fit:cover;display:block;
+  transition:transform .4s ease,opacity .3s}
+.gal-item:hover .gal-img{transform:scale(1.04)}
+.gal-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.6),transparent);
+  opacity:0;transition:opacity .3s;display:flex;align-items:flex-end;padding:12px}
+.gal-item:hover .gal-overlay{opacity:1}
+.gal-label{font-size:11px;color:var(--wh);font-weight:500;letter-spacing:.04em}
+
+/* placeholder kitchens using CSS gradients since no actual photos */
+.kit-1{background:linear-gradient(135deg,#2a2018 0%,#3d3020 30%,#1a1a14 60%,#2d2820 100%)}
+.kit-2{background:linear-gradient(135deg,#1e2028 0%,#2a3040 40%,#1a2030 70%,#232830 100%)}
+.kit-3{background:linear-gradient(135deg,#28201a 0%,#382818 40%,#201814 70%,#2a2016 100%)}
+.kit-4{background:linear-gradient(135deg,#1a2820 0%,#243428 40%,#182018 70%,#202822 100%)}
+.kit-5{background:linear-gradient(135deg,#28201a 0%,#3a2c1e 40%,#221a14 70%,#302418 100%)}
+
+/* Kitchen SVG placeholders */
+.kit-svg{width:100%;height:100%;display:flex;align-items:center;justify-content:center;opacity:.4}
+
+/* ── CONTACT FORM ── */
+.form-wrap{display:flex;flex-direction:column;gap:14px;margin-top:8px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--d1)}
+.field input,.field select,.field textarea{
+  background:var(--c1);border:1px solid var(--ln);border-radius:var(--r2);
+  padding:14px 16px;color:var(--wh);font-family:'Instrument Sans',sans-serif;
+  font-size:14px;outline:none;transition:border-color .2s;
+  -webkit-appearance:none;appearance:none}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:rgba(247,147,30,.5)}
+.field select option{background:var(--c1)}
+.field textarea{resize:vertical;min-height:90px}
+.field input::placeholder,.field textarea::placeholder{color:var(--d2)}
+
+/* summary card */
+.summary-card{background:var(--c2);border:1px solid var(--ln);border-radius:var(--r);
+  padding:16px 18px;margin-bottom:6px}
+.sum-title{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--d2);margin-bottom:12px}
+.sum-row{display:flex;justify-content:space-between;align-items:center;
+  padding:6px 0;border-bottom:1px solid var(--ln)}
+.sum-row:last-child{border-bottom:none;padding-top:10px}
+.sum-key{font-size:12.5px;color:var(--d1)}
+.sum-val{font-size:13px;font-weight:500;color:var(--wh)}
+.sum-total .sum-key{font-weight:500;color:var(--wh)}
+.sum-total .sum-val{font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--o)}
+
+/* ── SUBMIT BUTTON ── */
+.submit-btn{width:100%;padding:18px 22px;background:var(--o);color:var(--dk);
+  border:none;border-radius:var(--r);font-family:'Instrument Sans',sans-serif;
+  font-size:15px;font-weight:600;cursor:pointer;
+  display:flex;align-items:center;justify-content:space-between;
+  transition:opacity .2s,transform .15s;letter-spacing:.02em}
+.submit-btn:active{opacity:.88;transform:scale(.98)}
+.submit-arrow{font-size:20px}
+
+/* ── SUCCESS ── */
+.success-block{display:none;text-align:center;padding:40px 0}
+.success-icon{font-size:48px;margin-bottom:20px}
+.success-title{font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:400;
+  color:var(--wh);margin-bottom:12px}
+.success-sub{font-size:13px;color:var(--d1);line-height:1.7;margin-bottom:28px}
+.wa-btn{display:flex;align-items:center;justify-content:center;gap:10px;
+  width:100%;padding:18px;background:#25D366;color:#fff;
+  border:none;border-radius:var(--r);font-family:'Instrument Sans',sans-serif;
+  font-size:15px;font-weight:600;cursor:pointer;text-decoration:none;
+  transition:opacity .2s,transform .15s;margin-bottom:12px}
+.wa-btn:active{opacity:.88;transform:scale(.98)}
+.wa-icon{font-size:20px}
+.call-btn{display:flex;align-items:center;justify-content:center;gap:10px;
+  width:100%;padding:16px;background:transparent;color:var(--wh);
+  border:1px solid var(--ln2);border-radius:var(--r);font-family:'Instrument Sans',sans-serif;
+  font-size:14px;cursor:pointer;text-decoration:none;transition:border-color .2s}
+.call-btn:hover{border-color:var(--o)}
+
+/* ── WHATSAPP FLOAT ── */
+.wa-float{position:fixed;bottom:24px;right:22px;z-index:200;
+  width:52px;height:52px;border-radius:50%;background:#25D366;
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;box-shadow:0 4px 20px rgba(0,0,0,.4);
+  text-decoration:none;transition:transform .2s,box-shadow .2s}
+.wa-float:hover{transform:scale(1.08);box-shadow:0 6px 28px rgba(0,0,0,.5)}
+
+/* ── DIVIDER ── */
+.divider{max-width:520px;margin:0 auto;padding:0 22px}
+.divider-line{height:1px;background:linear-gradient(to right,transparent,var(--ln2),transparent)}
+
+/* ── ANIMS ── */
+@keyframes up{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{opacity:0;transform:translateY(18px);transition:opacity .5s ease,transform .5s ease}
+.fade-in.visible{opacity:1;transform:translateY(0)}
+
+/* disabled state */
+.disabled-section{opacity:.4;pointer-events:none;filter:blur(1px);transition:all .3s}
+.disabled-section.unlocked{opacity:1;pointer-events:auto;filter:none}
+
+/* country note */
+.country-note{font-size:11px;color:var(--d2);text-align:center;margin-top:6px;line-height:1.5}
+</style>
+</head>
+<body>
+
+<!-- PROGRESS -->
+<div class="progress-wrap">
+  <div class="progress-inner">
+    <div class="progress-logo">flip<span>it</span>.</div>
+    <div class="steps">
+      <div class="step active" id="s1"></div>
+      <div class="step" id="s2"></div>
+      <div class="step" id="s3"></div>
+      <div class="step" id="s4"></div>
+    </div>
+    <div class="step-labels">
+      <span class="step-lbl active" id="sl1">Inversión</span>
+      <span class="step-lbl" id="sl2">Paquete</span>
+      <span class="step-lbl" id="sl3">Intervención</span>
+      <span class="step-lbl" id="sl4">Contacto</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══ STEP 1: CALCULADORA ══ -->
+<section class="section-block" id="sec1">
+  <p class="eyebrow">Paso 1 de 4</p>
+  <h2>Tu cocina,<br><em>reconfigurada.</em></h2>
+  <p class="section-sub">Ajusta el valor de tu apartamento para orientar el enfoque del proyecto. La estimación completa se trabaja después del análisis del espacio.</p>
+
+  <div class="slider-card">
+    <div class="slider-top">
+      <span class="slider-lbl">Valor del apartamento</span>
+      <span class="slider-val" id="apt-val">$150,000</span>
+    </div>
+    <input type="range" id="apt-slider" min="100000" max="500000" step="5000" value="150000" oninput="onApt(this.value)">
+    <div class="slider-range"><span>$100K</span><span>$500K</span></div>
+
+  </div>
+
+  <div class="invest-card">
+    <div class="invest-title">Tu cocina no es un gasto, es una decisión sobre el valor de tu propiedad.</div>
+    <p class="invest-text">Una cocina bien diseñada no se define por un número fijo, sino por su relación con el valor del inmueble, el nivel de intervención y las condiciones reales del espacio.</p>
+    <div class="invest-range-wrap">
+      <span class="invest-range-label" id="client-profile-label">Enfoque estratégico</span>
+      <span class="invest-range" id="client-profile-title">Pendiente de selección</span>
+    </div>
+    <p class="invest-note" id="client-profile-text">Selecciona el tipo de intervención para recomendarte el paquete más conveniente sin exponer fórmulas de inversión públicamente.</p>
+  </div>
+
+  <div style="margin-top:28px;margin-bottom:6px">
+    <p style="font-size:13px;color:var(--d1);line-height:1.75">Cada cocina es diferente. Antes de hablar de precio, elige el tipo de intervención que mejor describe lo que quieres lograr. Esto nos permite preparar una propuesta adecuada a tu situación real.</p>
+  </div>
+
+  <div class="levels" style="margin-top:16px">
+
+    <!-- 01 ACTUALIZAR -->
+    <div class="lcard" id="lc0" onclick="selLevel(0)">
+      <div class="lcard-topbar"></div>
+      <div class="lcard-top">
+        <div class="lnum">01</div>
+        <div class="lmeta">
+          <div class="lname">Actualizar</div>
+          <div class="lsub">La cocina está bien ubicada, solo necesita renovarse</div>
+        </div>
+        <div class="lprice">
+          <div class="lprice-val" id="lp0">$10K–$16K</div>
+          <div class="lprice-tag">estimado</div>
+        </div>
+        <div class="lcheck" id="lchk0">✓</div>
+      </div>
+      <div class="lcard-body">
+        <p style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--o);margin:14px 0 8px;font-weight:500">¿Cuándo elegir este nivel?</p>
+        <p style="font-size:12.5px;color:var(--d1);line-height:1.65;margin-bottom:14px">Cuando la distribución de tu cocina funciona bien pero los módulos están deteriorados, desactualizados o simplemente no reflejan el nivel de tu apartamento. No hay necesidad de mover nada — solo de reemplazarlo.</p>
+        <p class="ldesc">Se mantiene el layout exacto. Los módulos existentes se retiran y se instalan nuevos de mejor calidad — mismo plano, mismo flujo, impacto visual inmediato. Sin obra civil ni plomería nueva.</p>
+        <p class="inc-title">Incluye</p>
+        <div class="inc-list">
+          <div class="inc-row"><div class="inc-dot"></div>Desmontaje y bote de módulos existentes</div>
+          <div class="inc-row"><div class="inc-dot"></div>Nuevos módulos MDF hidrófugo en la misma posición</div>
+          <div class="inc-row"><div class="inc-dot"></div>Encimera nueva, fregadero y grifo</div>
+          <div class="inc-row"><div class="inc-dot"></div>Herrajes, bisagras e instalación final</div>
+          <div class="inc-row"><div class="inc-dot"></div>Sin obra civil · sin plomería nueva</div>
+        </div>
+        <p class="prop-title">Distribución estimada del presupuesto</p>
+        <div class="prop-rows">
+          <div class="prop-row"><span class="prop-lbl">Materiales</span><div class="prop-track"><div class="prop-fill" style="width:55%"></div></div><span class="prop-pct">55%</span></div>
+          <div class="prop-row"><span class="prop-lbl">Mano de obra</span><div class="prop-track"><div class="prop-fill" style="width:25%"></div></div><span class="prop-pct">25%</span></div>
+          <div class="prop-row"><span class="prop-lbl">Gestión</span><div class="prop-track"><div class="prop-fill" style="width:20%"></div></div><span class="prop-pct">20%</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 02 AGREGAR -->
+    <div class="lcard" id="lc1" onclick="selLevel(1)">
+      <div class="lcard-topbar"></div>
+      <div class="lcard-top">
+        <div class="lnum">02</div>
+        <div class="lmeta">
+          <div class="lname">Agregar</div>
+          <div class="lsub">La cocina funciona, pero le falta espacio o elementos</div>
+        </div>
+        <div class="lprice">
+          <div class="lprice-val" id="lp1">$14K–$22K</div>
+          <div class="lprice-tag">estimado</div>
+        </div>
+        <div class="lcheck" id="lchk1">✓</div>
+      </div>
+      <div class="lcard-body">
+        <p style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--o);margin:14px 0 8px;font-weight:500">¿Cuándo elegir este nivel?</p>
+        <p style="font-size:12.5px;color:var(--d1);line-height:1.65;margin-bottom:14px">Cuando la cocina que tienes funciona y no quieres cambiar su distribución general ni mover salidas de plomería, pero sientes que le falta algo — una isla, una despensa, un módulo de bar. Se suma sin tocar lo que ya existe.</p>
+        <p class="ldesc">Se conserva todo lo existente y se incorporan nuevos elementos al layout actual sin modificar las salidas de plomería ni la distribución general de la cocina. La funcionalidad crece, la estructura permanece.</p>
+        <p class="inc-title">Incluye</p>
+        <div class="inc-list">
+          <div class="inc-row"><div class="inc-dot"></div>Conservación de módulos y distribución existente</div>
+          <div class="inc-row"><div class="inc-dot"></div>Fabricación e instalación de nuevos elementos</div>
+          <div class="inc-row"><div class="inc-dot"></div>Isla, alacena, bar u otros elementos según diseño</div>
+          <div class="inc-row"><div class="inc-dot"></div>Sin modificación de salidas de plomería ni distribución</div>
+          <div class="inc-row"><div class="inc-dot"></div>Integración visual y funcional con lo existente</div>
+        </div>
+        <p class="prop-title">Distribución estimada del presupuesto</p>
+        <div class="prop-rows">
+          <div class="prop-row"><span class="prop-lbl">Materiales</span><div class="prop-track"><div class="prop-fill" style="width:50%"></div></div><span class="prop-pct">50%</span></div>
+          <div class="prop-row"><span class="prop-lbl">Mano de obra</span><div class="prop-track"><div class="prop-fill" style="width:28%"></div></div><span class="prop-pct">28%</span></div>
+          <div class="prop-row"><span class="prop-lbl">Obra menor</span><div class="prop-track"><div class="prop-fill" style="width:12%"></div></div><span class="prop-pct">12%</span></div>
+          <div class="prop-row"><span class="prop-lbl">Gestión</span><div class="prop-track"><div class="prop-fill" style="width:10%"></div></div><span class="prop-pct">10%</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 03 REMODELAR -->
+    <div class="lcard" id="lc2" onclick="selLevel(2)">
+      <div class="lcard-topbar"></div>
+      <div class="lcard-top">
+        <div class="lnum">03</div>
+        <div class="lmeta">
+          <div class="lname">Remodelar</div>
+          <div class="lsub">La cocina necesita una nueva distribución desde cero</div>
+        </div>
+        <div class="lprice">
+          <div class="lprice-val" id="lp2">$18K–$40K</div>
+          <div class="lprice-tag">estimado</div>
+        </div>
+        <div class="lcheck" id="lchk2">✓</div>
+      </div>
+      <div class="lcard-body">
+        <p style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--o);margin:14px 0 8px;font-weight:500">¿Cuándo elegir este nivel?</p>
+        <p style="font-size:12.5px;color:var(--d1);line-height:1.65;margin-bottom:14px">Cuando la distribución actual de la cocina no funciona o no refleja cómo quieres usar el espacio. Se replantea todo — dónde va cada cosa, cómo fluye el espacio, qué materiales lo definen. Es la intervención más completa.</p>
+        <p class="ldesc">Distribución completamente nueva. Implica demolición, reubicación de plomería y un nuevo triángulo de trabajo. Módulos fabricados a medida, tope de calidad, plafones e iluminación diseñados. Dirección profesional de inicio a fin.</p>
+        <p class="inc-title">Incluye</p>
+        <div class="inc-list">
+          <div class="inc-row"><div class="inc-dot"></div>Diseño del nuevo layout y propuesta de materiales</div>
+          <div class="inc-row"><div class="inc-dot"></div>Demolición total, bote y manejo de escombros</div>
+          <div class="inc-row"><div class="inc-dot"></div>Plomería e instalaciones reubicadas</div>
+          <div class="inc-row"><div class="inc-dot"></div>Módulos a medida, tope premium, fregadero y accesorios</div>
+          <div class="inc-row"><div class="inc-dot"></div>Plafones, iluminación y revestimientos (si aplica)</div>
+          <div class="inc-row"><div class="inc-dot"></div>Dirección y supervisión completa del proyecto</div>
+        </div>
+        <p class="prop-title">Distribución estimada del presupuesto</p>
+        <div class="prop-rows">
+          <div class="prop-row"><span class="prop-lbl">Materiales</span><div class="prop-track"><div class="prop-fill" style="width:45%"></div></div><span class="prop-pct">45%</span></div>
+          <div class="prop-row"><span class="prop-lbl">Mano de obra</span><div class="prop-track"><div class="prop-fill" style="width:22%"></div></div><span class="prop-pct">22%</span></div>
+          <div class="prop-row"><span class="prop-lbl">Obra civil</span><div class="prop-track"><div class="prop-fill" style="width:18%"></div></div><span class="prop-pct">18%</span></div>
+          <div class="prop-row"><span class="prop-lbl">Diseño + dirección</span><div class="prop-track"><div class="prop-fill" style="width:15%"></div></div><span class="prop-pct">15%</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider" style="margin-top:52px"><div class="divider-line"></div></div>
+
+<!-- ══ STEP 2: PAQUETES DE DISEÑO ══ -->
+<section class="section-block disabled-section" id="sec2">
+  <p class="eyebrow">Paso 2 de 4</p>
+  <h2>Elige tu<br><em>paquete.</em></h2>
+  <p class="section-sub">El diseño define el resultado del proyecto. Estos paquetes incluyen análisis, levantamiento o propuesta según el nivel elegido. La ejecución se cotiza por separado.</p>
+
+  <div class="pkg-rec-note" id="pkg-rec-note">Según el tipo de intervención seleccionado, te recomendaremos el paquete más conveniente.</div>
+
+  <div class="pkgs">
+
+    <!-- EXPRESS -->
+    <div class="pkg" id="pkg0" onclick="selPkg(0)">
+      <div class="pkg-bar"></div>
+      <div class="pkg-head">
+        <div class="pkg-meta">
+          <div class="pkg-left">
+            <div class="pkg-time">Remota</div>
+            <div class="pkg-name">Express</div>
+          </div>
+          <div class="pkg-right">
+            <div class="pkg-price">RD$12,500</div>
+            <div class="pkg-usd" id="pkg-usd0">≈ $217 USD</div>
+            <div class="pkg-dep" id="pkg-dep0">Pago para iniciar: RD$12,500</div>
+          </div>
+        </div>
+        <ul class="pkg-items">
+          <li>Análisis del espacio por fotos / video</li>
+          <li>Distribución conceptual</li>
+          <li>Lineamientos generales de diseño</li>
+          <li>Rango estimado de inversión</li>
+          <li>Ideal para tener una visión clara antes de avanzar</li>
+        </ul>
+      </div>
+      <div class="pkg-sel-wrap">
+        <button class="pkg-sel-btn" onclick="confirmPkg(event,0)">Elegir Express →</button>
+      </div>
+    </div>
+
+    <!-- PLUS -->
+    <div class="pkg" id="pkg1" onclick="selPkg(1)">
+      <div class="pkg-bar"></div>
+      <div class="pkg-head">
+        <div class="pkg-meta">
+          <div class="pkg-left">
+            <div class="pkg-time">4 días</div>
+            <div class="pkg-name">Plus</div>
+          </div>
+          <div class="pkg-right">
+            <div class="pkg-price">RD$30,000</div>
+            <div class="pkg-usd" id="pkg-usd1">≈ $522 USD</div>
+            <div class="pkg-dep" id="pkg-dep1">70% al iniciar: RD$21,000</div>
+          </div>
+        </div>
+        <ul class="pkg-items">
+          <li>Levantamiento arquitectónico + digitalización</li>
+          <li>Distribución propuesta (1)</li>
+          <li>Visualización 3D (1)</li>
+          <li>Presupuesto general de obra</li>
+          <li>Recomendaciones técnicas</li>
+          <li>Reunión virtual</li>
+          <li>Ideal para definir el proyecto y tomar decisiones</li>
+        </ul>
+      </div>
+      <div class="pkg-sel-wrap">
+        <button class="pkg-sel-btn" onclick="confirmPkg(event,1)">Elegir Plus →</button>
+      </div>
+    </div>
+
+    <!-- PREMIUM -->
+    <div class="pkg" id="pkg2" onclick="selPkg(2)">
+      <div class="pkg-bar"></div>
+      <div class="pkg-head">
+        <div class="pkg-meta">
+          <div class="pkg-left">
+            <div class="pkg-time">6 días</div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:0">
+              <div class="pkg-name" style="margin-bottom:0">Premium</div>
+              <span class="best-badge" style="position:static;font-size:8px;padding:3px 7px">Más completo</span>
+            </div>
+          </div>
+          <div class="pkg-right">
+            <div class="pkg-price">RD$55,000</div>
+            <div class="pkg-usd" id="pkg-usd2">≈ $957 USD</div>
+            <div class="pkg-dep" id="pkg-dep2">70% al iniciar: RD$38,500</div>
+          </div>
+        </div>
+        <ul class="pkg-items">
+          <li>Levantamiento arquitectónico + digitalización</li>
+          <li>Distribuciones propuestas (2)</li>
+          <li>Visualizaciones 3D (2)</li>
+          <li>Presupuesto general + ajustes</li>
+          <li>Recomendaciones técnicas avanzadas</li>
+          <li>Optimización para mobiliario y ejecución</li>
+          <li>Reunión presencial</li>
+        </ul>
+      </div>
+      <div class="pkg-sel-wrap">
+        <button class="pkg-sel-btn" onclick="confirmPkg(event,2)">Elegir Premium →</button>
+      </div>
+    </div>
+
+  </div>
+  <p class="country-note">Precios en pesos dominicanos. El equivalente en USD se calcula a una tasa referencial y puede variar según el día.<br>La ejecución se cotiza por separado luego del análisis o levantamiento.</p>
+</section>
+
+<div class="divider" style="margin-top:52px"><div class="divider-line"></div></div>
+
+<!-- ══ STEP 3: CONTACTO ══ -->
+<section class="section-block disabled-section" id="sec4">
+  <p class="eyebrow">Paso 3 de 4</p>
+  <h2>Agenda tu<br><em>visita.</em></h2>
+  <p class="section-sub">Completa tus datos. Te contactaremos por WhatsApp en menos de 24 horas para confirmar fecha y hora.</p>
+
+  <!-- Summary -->
+  <div class="summary-card" id="summary-card">
+    <div class="sum-title">Tu selección</div>
+    <div class="sum-row"><span class="sum-key">Nivel de intervención</span><span class="sum-val" id="sum-level">—</span></div>
+    <div class="sum-row"><span class="sum-key">Paquete de diseño</span><span class="sum-val" id="sum-pkg">—</span></div>
+    <div class="sum-row"><span class="sum-key">Precio del paquete</span><span class="sum-val" id="sum-price">—</span></div>
+    <div class="sum-row sum-total"><span class="sum-key">Pago para iniciar</span><span class="sum-val" id="sum-dep">—</span></div>
+  </div>
+
+  <div class="form-wrap" id="contact-form">
+    <div class="field">
+      <label>Nombre completo</label>
+      <input type="text" id="f-name" placeholder="Tu nombre">
+    </div>
+    <div class="field">
+      <label>WhatsApp / Teléfono</label>
+      <input type="tel" id="f-phone" placeholder="+1 809 000 0000">
+    </div>
+    <div class="field">
+      <label>País</label>
+      <select id="f-country">
+        <option value="RD">🇩🇴 República Dominicana</option>
+        <option value="US">🇺🇸 Estados Unidos</option>
+        <option value="PR">🇵🇷 Puerto Rico</option>
+        <option value="MX">🇲🇽 México</option>
+        <option value="CO">🇨🇴 Colombia</option>
+        <option value="VE">🇻🇪 Venezuela</option>
+        <option value="PA">🇵🇦 Panamá</option>
+        <option value="OTHER">🌎 Otro país</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Dirección del apartamento</label>
+      <input type="text" id="f-address" placeholder="Torre, apto o sector">
+    </div>
+    <div class="field">
+      <label>¿Algo que quieras contarnos? (opcional)</label>
+      <textarea id="f-notes" placeholder="Ideas, referencias, restricciones..."></textarea>
+    </div>
+
+    <button class="submit-btn" onclick="submitForm()">
+      <span id="submit-text">Enviar y contactar por WhatsApp</span>
+      <span class="submit-arrow">→</span>
+    </button>
+    <p class="country-note">Tu información es privada y solo se usa para coordinar tu visita.</p>
+  </div>
+
+  <!-- SUCCESS -->
+  <div class="success-block" id="success-block">
+    <div class="success-icon">✅</div>
+    <h2 style="font-size:32px">¡Listo!</h2>
+    <p class="success-sub">Recibimos tu solicitud. Te contactaremos por WhatsApp en menos de 24 horas para confirmar tu visita de levantamiento.<br><br>Si prefieres, puedes escribirnos directamente ahora mismo.</p>
+    <a href="#" id="wa-final-btn" class="wa-btn" style="background:transparent;border:1px solid var(--ln2);color:var(--wh)">
+      <span class="wa-icon">💬</span>
+      <span>Escribir por WhatsApp ahora</span>
+    </a>
+    <a href="tel:+18494645460" class="call-btn">
+      📞 Llamar al 849-464-5460
+    </a>
+  </div>
+</section>
+
+<!-- Instagram footer card -->
+<section style="max-width:520px;margin:0 auto;padding:40px 22px 60px;position:relative;z-index:1">
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;background:var(--c2);border:1px solid var(--ln);border-radius:var(--r);padding:16px 18px">
+    <div>
+      <div style="font-size:13px;font-weight:600;color:var(--wh);margin-bottom:3px">¿Quieres ver el portafolio?</div>
+      <div style="font-size:12px;color:var(--d1)">Todos nuestros proyectos ejecutados están en Instagram.</div>
+    </div>
+    <a href="https://instagram.com/flipitrd" target="_blank" style="background:var(--o);color:var(--dk);text-decoration:none;padding:9px 16px;border-radius:var(--r2);font-size:12px;font-weight:600;white-space:nowrap;flex-shrink:0">Ver →</a>
+  </div>
+</section>
+
+<!-- WhatsApp Float -->
+<a href="https://wa.me/18494645460" target="_blank" class="wa-float" title="WhatsApp">💬</a>
+
+<script>
+// ── STATE ────────────────────────────────────────────────────────────────────
+const STATE = {
+  apt: 150000,
+  levelIdx: -1,
+  pkgIdx: -1,
+};
+
+const LEVELS = [
+  { name: 'Actualizar', lo: 10000, hi: 16000 },
+  { name: 'Agregar',    lo: 14000, hi: 22000 },
+  { name: 'Remodelar',  lo: 18000, hi: 40000 },
+];
+const PKGS = [
+  { name: 'Express',  rd: 12500, time: 'Remota', depRate: 1.0, recommendedFor: 'Actualizar' },
+  { name: 'Plus',     rd: 30000, time: 'Proyecto definido', depRate: 0.7, recommendedFor: 'Agregar' },
+  { name: 'Premium',  rd: 55000, time: 'Control total', depRate: 0.7, recommendedFor: 'Remodelar' },
+];
+
+const LEVEL_RECOMMENDATIONS = [
+  { pkgIdx: 0, text: 'Para una actualización ligera, recomendamos <strong>Express</strong>: te da una visión clara y lineamientos de diseño antes de avanzar.' },
+  { pkgIdx: 1, text: 'Para agregar elementos o definir mejor la cocina, recomendamos <strong>Plus</strong>: incluye levantamiento, una distribución, una visualización 3D y presupuesto general.' },
+  { pkgIdx: 2, text: 'Para una remodelación completa, recomendamos <strong>Premium</strong>: permite comparar dos propuestas, dos visualizaciones 3D y preparar mejor la ejecución.' },
+];
+
+// Exchange rate (approximate, noted as "del día")
+const RATE = 57.5;
+
+// ── FORMAT ───────────────────────────────────────────────────────────────────
+function fmt(n) { return '$' + Math.round(n).toLocaleString('en-US'); }
+function fmtK(n) { return '$' + Math.round(n/1000) + 'K'; }
+function fmtRD(n) { return 'RD$' + Math.round(n).toLocaleString('en-US'); }
+function getDeposit(pkg) { return Math.round(pkg.rd * (pkg.depRate || 0.7)); }
+function getDepositLabel(pkg) { return (pkg.depRate >= 1 ? 'Pago para iniciar: ' : Math.round(pkg.depRate * 100) + '% al iniciar: ') + fmtRD(getDeposit(pkg)); }
+
+
+function sendLeadToMake(payload) {
+  const webhookUrl = 'https://hook.us2.make.com/6xl12jmneeen37lgxs774hffcon15lim';
+
+  // Envío principal por fetch. Se usa URLSearchParams para evitar problemas de CORS/preflight.
+  try {
+    fetch(webhookUrl, {
+      method: 'POST',
+      mode: 'no-cors',
+      body: new URLSearchParams(payload)
+    }).catch(err => {
+      console.log('Lead fetch error:', err);
+      sendLeadToMakeFallback(payload, webhookUrl);
+    });
+
+    return true;
+  } catch (err) {
+    console.log('Lead fetch exception:', err);
+    return sendLeadToMakeFallback(payload, webhookUrl);
+  }
+}
+
+function sendLeadToMakeFallback(payload, webhookUrl) {
+  try {
+    // Backup: form POST oculto.
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = webhookUrl;
+    form.target = 'make_hidden_iframe';
+    form.style.display = 'none';
+
+    Object.keys(payload).forEach(key => {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = key;
+      input.value = payload[key] == null ? '' : String(payload[key]);
+      form.appendChild(input);
+    });
+
+    document.body.appendChild(form);
+    form.submit();
+
+    setTimeout(() => {
+      if (form && form.parentNode) form.parentNode.removeChild(form);
+    }, 3000);
+
+    return true;
+  } catch (err) {
+    console.log('Lead fallback error:', err);
+    return false;
+  }
+}
+
+// ── PROGRESS ─────────────────────────────────────────────────────────────────
+function setProgress(active) {
+  for (let i = 1; i <= 4; i++) {
+    const s = document.getElementById('s'+i);
+    const l = document.getElementById('sl'+i);
+    if (!s || !l) continue;
+    if (i < active) { s.className='step done'; l.className='step-lbl'; }
+    else if (i === active) { s.className='step active'; l.className='step-lbl active'; }
+    else { s.className='step'; l.className='step-lbl'; }
+  }
+}
+
+// ── SLIDER ───────────────────────────────────────────────────────────────────
+function getClientProfile() {
+  const val = STATE.apt;
+  const lvl = STATE.levelIdx;
+
+  if (lvl === 2 || val >= 300000) {
+    return {
+      key: 'premium',
+      label: 'Enfoque premium',
+      title: 'Maximizar valor y resultado',
+      pkgIdx: 2,
+      pkgName: 'Premium',
+      text: 'En este caso conviene trabajar una propuesta más completa: comparar alternativas, cuidar materiales, prever ejecución y elevar el nivel percibido del inmueble.',
+      whatsapp: 'Quiero llevar mi cocina a un nivel superior y maximizar el valor del espacio.'
+    };
+  }
+
+  if (lvl === 1 || val >= 180000) {
+    return {
+      key: 'funcional',
+      label: 'Enfoque funcional',
+      title: 'Decidir con claridad antes de invertir',
+      pkgIdx: 1,
+      pkgName: 'Plus',
+      text: 'Aquí lo importante es definir bien la distribución, validar una visualización y tener un presupuesto general antes de avanzar a obra.',
+      whatsapp: 'Quiero mejorar mi cocina con una propuesta clara antes de avanzar.'
+    };
+  }
+
+  return {
+    key: 'conservador',
+    label: 'Enfoque controlado',
+    title: 'Optimizar inversión sin gastar de más',
+    pkgIdx: 0,
+    pkgName: 'Express',
+    text: 'Para empezar, conviene una evaluación remota que ordene ideas, defina lineamientos y te dé claridad antes de comprometerte con una propuesta completa.',
+    whatsapp: 'Busco optimizar mi inversión sin gastar de más.'
+  };
+}
+
+function updateClientProfile() {
+  const profile = getClientProfile();
+  const label = document.getElementById('client-profile-label');
+  const title = document.getElementById('client-profile-title');
+  const text = document.getElementById('client-profile-text');
+  if (label) label.textContent = profile.label;
+  if (title) title.textContent = profile.title;
+  if (text) text.textContent = profile.text;
+  updatePackageRecommendation();
+}
+
+function onApt(val) {
+  STATE.apt = parseInt(val);
+  document.getElementById('apt-val').textContent = fmt(STATE.apt);
+  updateClientProfile();
+  updateSubmitButton();
+
+  const sl = document.getElementById('apt-slider');
+  const pct = ((STATE.apt - +sl.min) / (+sl.max - +sl.min)) * 100;
+  sl.style.background = `linear-gradient(to right, #C9A96E ${pct}%, #2C3644 ${pct}%)`;
+
+  // Prices adjust with apartment value — no visual effect on cards
+  const seg = STATE.apt < 180000 ? 0 : STATE.apt < 280000 ? 1 : 2;
+  const hi0 = seg > 0 ? 18000 : 16000;
+  const hi1 = seg > 1 ? 25000 : 22000;
+  const hi2 = seg === 2 && STATE.apt >= 350000 ? 45000 : 40000;
+  document.getElementById('lp0').textContent = '$10K – $' + (hi0/1000) + 'K';
+  document.getElementById('lp1').textContent = '$14K – $' + (hi1/1000) + 'K';
+  document.getElementById('lp2').textContent = '$18K – $' + (hi2/1000) + 'K+';
+}
+
+// ── SELECT LEVEL ─────────────────────────────────────────────────────────────
+function selLevel(idx) {
+  STATE.levelIdx = idx;
+  for (let i = 0; i < 3; i++) {
+    document.getElementById('lc'+i).className = 'lcard' + (i===idx?' sel':'');
+  }
+  updateClientProfile();
+  updateSubmitButton();
+  // Unlock step 2
+  const sec2 = document.getElementById('sec2');
+  sec2.classList.remove('disabled-section');
+  sec2.classList.add('unlocked');
+  setProgress(2);
+  setTimeout(() => sec2.scrollIntoView({ behavior:'smooth', block:'start' }), 200);
+}
+
+// ── SELECT PKG ───────────────────────────────────────────────────────────────
+function updatePackageRecommendation() {
+  const profile = getClientProfile();
+  const baseRec = STATE.levelIdx >= 0 ? LEVEL_RECOMMENDATIONS[STATE.levelIdx] : null;
+  const note = document.getElementById('pkg-rec-note');
+  if (note) {
+    const recText = baseRec ? baseRec.text : 'Según el valor del apartamento y el tipo de intervención, te recomendaremos el paquete más conveniente.';
+    note.innerHTML = recText + '<br><span class="pkg-rec-badge">Paquete sugerido: ' + profile.pkgName + '</span>';
+  }
+  for (let i = 0; i < 3; i++) {
+    const el = document.getElementById('pkg'+i);
+    if (!el) continue;
+    el.className = 'pkg' + (STATE.pkgIdx===i?' sel':'') + (profile.pkgIdx===i?' recommended':'');
+  }
+}
+
+
+function selPkg(idx) {
+  STATE.pkgIdx = idx;
+  const profile = getClientProfile();
+  for (let i = 0; i < 3; i++) {
+    document.getElementById('pkg'+i).className = 'pkg' + (i===idx?' sel':'') + (profile.pkgIdx===i?' recommended':'');
+  }
+  // Update USD equivalents and deposits
+  PKGS.forEach((p, i) => {
+    const usd = Math.round(p.rd / RATE);
+    document.getElementById('pkg-usd'+i).textContent = '≈ $' + usd + ' USD';
+    document.getElementById('pkg-dep'+i).textContent = getDepositLabel(p);
+  });
+}
+
+function confirmPkg(e, idx) {
+  e.stopPropagation();
+  STATE.pkgIdx = idx;
+  // Unlock contact directly (gallery section removed)
+  const sec4 = document.getElementById('sec4');
+  sec4.classList.remove('disabled-section');
+  sec4.classList.add('unlocked');
+  setProgress(3);
+
+  // Fill summary card
+  const pkg = PKGS[STATE.pkgIdx];
+  const level = LEVELS[STATE.levelIdx] || { name: '—' };
+  document.getElementById('sum-level').textContent = level.name;
+  document.getElementById('sum-pkg').textContent = pkg.name + ' · ' + pkg.time;
+  document.getElementById('sum-price').textContent = fmtRD(pkg.rd);
+  document.getElementById('sum-dep').textContent = fmtRD(getDeposit(pkg));
+
+  setTimeout(() => sec4.scrollIntoView({ behavior:'smooth', block:'start' }), 200);
+}
+
+// ── GALLERY → CONTACT ─────────────────────────────────────────────────────────
+function unlockContact() {
+  if (STATE.levelIdx < 0 || STATE.pkgIdx < 0) {
+    alert('Por favor elige un nivel de intervención y un paquete de diseño primero.');
+    return;
+  }
+  const sec4 = document.getElementById('sec4');
+  sec4.classList.remove('disabled-section');
+  sec4.classList.add('unlocked');
+  setProgress(3);
+
+  // Fill summary
+  const pkg = PKGS[STATE.pkgIdx];
+  document.getElementById('sum-level').textContent = LEVELS[STATE.levelIdx].name;
+  document.getElementById('sum-pkg').textContent = pkg.name + ' · ' + pkg.time;
+  document.getElementById('sum-price').textContent = fmtRD(pkg.rd);
+  document.getElementById('sum-dep').textContent = fmtRD(getDeposit(pkg));
+
+  setTimeout(() => sec4.scrollIntoView({ behavior:'smooth', block:'start' }), 200);
+}
+
+// ── SUBMIT ───────────────────────────────────────────────────────────────────
+function submitForm() {
+  const name    = document.getElementById('f-name').value.trim();
+  const phone   = document.getElementById('f-phone').value.trim();
+  const country = document.getElementById('f-country').value;
+  const address = document.getElementById('f-address').value.trim();
+  const notes   = document.getElementById('f-notes').value.trim();
+
+  if (!name || !phone) {
+    alert('Por favor completa tu nombre y teléfono.');
+    return;
+  }
+
+  const pkg   = PKGS[STATE.pkgIdx] || { name: 'N/A', rd: 0 };
+  const level = LEVELS[STATE.levelIdx] || { name: 'N/A' };
+  const profile = getClientProfile();
+  const dep   = pkg.rd ? getDeposit(pkg) : 0;
+
+  const leadPayload = {
+    fecha: new Date().toISOString(),
+    nombre: name,
+    telefono: phone,
+    pais: country,
+    direccion: address || "",
+    nivel: level.name,
+    paquete: pkg.name,
+    monto: String(pkg.rd || 0),
+    deposito: String(dep || 0),
+    enfoque: profile.label + " - " + profile.title,
+    notas: notes || ""
+  };
+  sendLeadToMake(leadPayload);
+
+
+  const msg = encodeURIComponent(
+    `Hola! 👋\n\n` +
+    `${profile.whatsapp}\n\n` +
+    `*Mi selección:*\n` +
+    `• Nivel: ${level.name}\n` +
+    `• Enfoque: ${profile.label} — ${profile.title}\n` +
+    `• Paquete: ${pkg.name}\n` +
+    `• Precio: ${fmtRD(pkg.rd)}\n` +
+    `• Pago para iniciar: ${fmtRD(dep)}\n` +
+    `• Nota: ${profile.whatsapp}\n\n` +
+    `*Mis datos:*\n` +
+    `• Nombre: ${name}\n` +
+    `• Tel: ${phone}\n` +
+    `• País: ${country}\n` +
+    `• Dirección: ${address || 'Por definir'}\n` +
+    (notes ? `• Notas: ${notes}\n` : '') +
+    `\nQuedo pendiente de tu confirmación. ¡Gracias!`
+  );
+
+  document.getElementById('contact-form').style.display = 'none';
+  document.getElementById('success-block').style.display = 'block';
+  document.getElementById('wa-final-btn').href = `https://wa.me/18494645460?text=${msg}`;
+  setProgress(4);
+
+  // Backup comercial: abre WhatsApp automáticamente para no depender solo del botón final.
+  setTimeout(() => {
+    window.open(`https://wa.me/18494645460?text=${msg}`, '_blank');
+  }, 800);
+}
+
+// ── WA HELPER ────────────────────────────────────────────────────────────────
+function openWA(topic) {
+  const msg = encodeURIComponent(`Hola! Me gustaría ${topic}.`);
+  window.open(`https://wa.me/18494645460?text=${msg}`, '_blank');
+}
+
+
+function updateSubmitButton() {
+  const profile = getClientProfile();
+  const btn = document.getElementById("submit-text");
+  if (!btn) return;
+
+  if (profile.key === "conservador") btn.textContent = "Iniciar evaluación";
+  if (profile.key === "funcional") btn.textContent = "Definir proyecto";
+  if (profile.key === "premium") btn.textContent = "Ejecutar proyecto";
+}
+
+// ── BASIC COPY DETERRENTS ───────────────────────────────────────────────────
+(function(){
+  const block = (e) => e.preventDefault();
+  document.addEventListener('contextmenu', block);
+  document.addEventListener('dragstart', block);
+  document.addEventListener('keydown', function(e){
+    const k = (e.key || '').toLowerCase();
+    if (k === 'f12' || (e.ctrlKey && e.shiftKey && ['i','j','c'].includes(k)) || (e.ctrlKey && ['u','s'].includes(k)) || (e.metaKey && ['u','s'].includes(k))) {
+      e.preventDefault();
+      return false;
+    }
+  });
+})();
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+onApt(150000);
+PKGS.forEach((p, i) => {
+  const usd = Math.round(p.rd / RATE);
+  const usdEl = document.getElementById('pkg-usd'+i);
+  const depEl = document.getElementById('pkg-dep'+i);
+  if (usdEl) usdEl.textContent = '≈ $' + usd + ' USD';
+  if (depEl) depEl.textContent = getDepositLabel(p);
+});
+setProgress(1);
+
+// Intersection observer for fade-ins
+const obs = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1 });
+document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
+</script>
+<iframe name="make_hidden_iframe" id="make_hidden_iframe" style="display:none;width:0;height:0;border:0;"></iframe>
+</body>
+</html>
